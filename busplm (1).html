@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BusPLM — Manufacturing Design Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f2ec;--bg2:#ede9e0;--surface:#fff;--border:#d8d2c4;--border2:#c8c0b0;
+  --ink:#1a1814;--ink2:#5a5448;
+  --mech:#1a3a6e;--elec:#c8820a;--body:#2a6e3a;--paint:#8e2a5a;
+  --green:#16a34a;--yellow:#d97706;--red:#dc2626;--blue:#1a3a6e;
+  --shadow:0 2px 12px #1a181420;--shadow-lg:0 8px 32px #1a181428;
+  --ff-head:'Barlow Condensed',sans-serif;--ff-mono:'DM Mono',monospace;
+  --radius:4px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:var(--ff-mono);font-size:13px;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}
+header{background:var(--ink);color:#f5f2ec;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--mech);}
+.logo{font-family:var(--ff-head);font-size:1.6rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+.logo-badge{background:var(--mech);color:#fff;font-size:.7rem;padding:2px 8px;border-radius:2px;font-weight:600;letter-spacing:.1em;}
+.header-nav{display:flex;gap:6px;}
+.header-nav button{background:none;border:1px solid #ffffff30;color:#f5f2ec;font-family:var(--ff-mono);font-size:.75rem;padding:6px 14px;border-radius:2px;cursor:pointer;transition:all .15s;}
+.header-nav button:hover,.header-nav button.active{background:var(--mech);border-color:var(--mech);}
+.breadcrumb{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 2rem;display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--ink2);}
+.breadcrumb span{cursor:pointer;}.breadcrumb span:hover{color:var(--mech);text-decoration:underline;}
+.breadcrumb .sep{color:var(--border2);}.breadcrumb .current{color:var(--ink);font-weight:500;}
+.main{padding:2rem;max-width:1400px;margin:0 auto;}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+.page-title{font-family:var(--ff-head);font-size:2.2rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1;}
+.page-sub{color:var(--ink2);font-size:.78rem;margin-top:4px;}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn{font-family:var(--ff-head);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 18px;border-radius:var(--radius);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--mech);color:#fff;}.btn-primary:hover{background:#0f2a5a;}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--ink);}.btn-outline:hover{border-color:var(--mech);color:var(--mech);}
+.btn-sm{padding:5px 12px;font-size:.78rem;}
+.dept-btn{color:#fff;}
+.dept-mech-bg{background:var(--mech);}
+.dept-elec-bg{background:var(--elec);}
+.dept-body-bg{background:var(--body);}
+.dept-paint-bg{background:var(--paint);}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;}
+.stats-row{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.4rem;box-shadow:var(--shadow);flex:1;min-width:130px;}
+.stat-num{font-family:var(--ff-head);font-size:2rem;font-weight:800;line-height:1;margin-bottom:2px;}
+.stat-label{font-size:.68rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;}
+.progress-bar-bg{background:var(--bg2);border-radius:10px;overflow:hidden;}
+.progress-bar-fill{border-radius:10px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.wf-pill{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;padding:2px 9px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.wf-notstarted{background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;}
+.wf-inprogress{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+.wf-review{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+.wf-done{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+.wf-blocked{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+.project-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both;}
+.project-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.project-card-top{background:var(--ink);padding:1.2rem 1.2rem 1rem;position:relative;overflow:hidden;}
+.project-card-top::before{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border:12px solid #ffffff10;border-radius:50%;}
+.project-num{font-size:.65rem;color:#ffffff60;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.project-name{font-family:var(--ff-head);font-size:1.4rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.03em;line-height:1.1;}
+.project-card-body{padding:1rem 1.2rem;}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 1.2rem;border-top:1px solid var(--border);font-size:.72rem;color:var(--ink2);}
+.part-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both;}
+.part-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.part-card-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+.part-id{font-size:.65rem;color:var(--ink2);letter-spacing:.06em;}
+.part-name-big{font-family:var(--ff-head);font-size:1.1rem;font-weight:700;text-transform:uppercase;}
+.part-body{padding:1rem;}
+.dept-wf-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bg2);}
+.dept-wf-row:last-child{border-bottom:none;}
+.dept-dot-sm{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.prog-band{background:var(--ink);color:#fff;border-radius:var(--radius);padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
+.prog-band-title{font-family:var(--ff-head);font-size:1.1rem;font-weight:700;text-transform:uppercase;white-space:nowrap;}
+.prog-band-bar{flex:1;min-width:200px;}
+.phase-pill{font-size:.68rem;padding:3px 10px;border-radius:10px;font-weight:500;}
+.req-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;box-shadow:var(--shadow);}
+.req-section-title{font-family:var(--ff-head);font-size:1rem;font-weight:700;text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:8px;}
+.req-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg2);}
+.req-item:last-child{border-bottom:none;}
+.req-check{width:20px;height:20px;border-radius:3px;border:2px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s;margin-top:1px;}
+.req-check.checked{background:var(--green);border-color:var(--green);color:#fff;}
+.req-text{flex:1;}
+.req-title-text{font-size:.82rem;font-weight:500;}
+.req-meta{font-size:.68rem;color:var(--ink2);margin-top:2px;}
+.req-priority{font-size:.6rem;padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:600;}
+.prio-high{background:#fee2e2;color:#991b1b;}
+.prio-med{background:#fef3c7;color:#92400e;}
+.prio-low{background:#f0fdf4;color:#166534;}
+.dept-section-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:var(--shadow);}
+.dept-section-head{padding:1rem 1.2rem;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.dept-stripe{width:5px;align-self:stretch;border-radius:3px;flex-shrink:0;}
+.dept-section-info{flex:1;}
+.dept-title{font-family:var(--ff-head);font-size:1.1rem;font-weight:800;text-transform:uppercase;}
+.dept-section-body{padding:1rem 1.2rem;}
+.wf-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.8rem;}
+.wf-opt{padding:5px 12px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;cursor:pointer;border:2px solid transparent;transition:all .15s;font-family:var(--ff-mono);}
+.wf-opt:hover{opacity:.8;}
+.wf-opt.active-opt{box-shadow:0 0 0 2px var(--ink);}
+.file-list{display:flex;flex-direction:column;gap:6px;}
+.file-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:12px;animation:fadeUp .25s ease;}
+.file-icon{font-size:1.4rem;flex-shrink:0;}
+.file-info{flex:1;min-width:0;}
+.file-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+.file-meta{font-size:.68rem;color:var(--ink2);margin-top:2px;}
+.file-actions{display:flex;gap:6px;flex-shrink:0;}
+.file-preview-thumb{width:44px;height:44px;border-radius:2px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:700px){.two-col,.form-row{grid-template-columns:1fr;}}
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:#1a181480;backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--mech);border-radius:var(--radius);width:min(600px,96vw);max-height:90vh;overflow-y:auto;padding:2rem;animation:modalIn .2s ease;box-shadow:var(--shadow-lg);}
+@keyframes modalIn{from{opacity:0;transform:scale(.97) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-title{font-family:var(--ff-head);font-size:1.4rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+.modal-close{background:none;border:none;font-size:1.4rem;color:var(--ink2);cursor:pointer;line-height:1;}
+.modal-close:hover{color:var(--ink);}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:.7rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);font-family:var(--ff-mono);font-size:.82rem;color:var(--ink);padding:9px 12px;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--mech);}
+.form-group textarea{resize:vertical;min-height:72px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem;text-align:center;color:var(--ink2);font-size:.8rem;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:1rem;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--mech);background:#1a3a6e08;}
+.upload-zone .upload-icon{font-size:2rem;margin-bottom:8px;}
+#fileInputHidden{display:none;}
+.lightbox{display:none;position:fixed;inset:0;z-index:500;background:#000c;align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:4px;}
+.lightbox-close{position:absolute;top:1rem;right:1rem;background:#fff2;border:none;color:#fff;font-size:2rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
+.section-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--ink2);}
+.empty-state .ei{font-size:2.5rem;margin-bottom:1rem;}
+.empty-state h3{font-family:var(--ff-head);font-size:1.1rem;color:var(--ink);margin-bottom:6px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--ink2);cursor:pointer;margin-bottom:1rem;background:none;border:none;font-family:var(--ff-mono);}
+.back-link:hover{color:var(--mech);}
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:400;background:var(--ink);color:#f5f2ec;border-radius:var(--radius);padding:10px 18px;font-size:.8rem;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.req-priority-btns{display:flex;gap:6px;}
+.req-priority-btns button{flex:1;padding:6px;border-radius:3px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;font-family:var(--ff-mono);font-size:.72rem;transition:all .15s;}
+.req-priority-btns button.sel-high{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:700;}
+.req-priority-btns button.sel-med{background:#fef3c7;border-color:#fcd34d;color:#92400e;font-weight:700;}
+.req-priority-btns button.sel-low{background:#f0fdf4;border-color:#86efac;color:#166534;font-weight:700;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Bus<span style="color:#4a8fd4">PLM</span><span class="logo-badge">Design Hub</span></div>
+  <div class="header-nav">
+    <button class="active" onclick="goHome()">Projects</button>
+    <button onclick="exportCSV()">↓ Export CSV</button>
+  </div>
+</header>
+
+<div class="breadcrumb" id="breadcrumb"><span onclick="goHome()">Home</span></div>
+<div class="main" id="mainContent"></div>
+
+<!-- PROJECT MODAL -->
+<div class="overlay" id="projectModal" onclick="closeModal('projectModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">New Project / Bus Model <button class="modal-close" onclick="closeModal('projectModal')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Project / Model Name *</label><input type="text" id="pName" placeholder="e.g. City Bus CB-400"></div>
+      <div class="form-group"><label>Project Code *</label><input type="text" id="pCode" placeholder="e.g. CB-400"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Client / Customer</label><input type="text" id="pClient" placeholder="e.g. GSRTC"></div>
+      <div class="form-group"><label>Bus Type</label>
+        <select id="pType"><option>City Bus</option><option>School Bus</option><option>Luxury Coach</option><option>Mini Bus</option><option>Electric Bus</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Target Date</label><input type="text" id="pDate" placeholder="e.g. Jun 2025"></div>
+      <div class="form-group"><label>Total Budget (₹)</label><input type="text" id="pBudget" placeholder="e.g. 45,00,000"></div>
+    </div>
+    <div class="form-group"><label>Description / Scope</label><textarea id="pDesc" placeholder="Project notes, scope, specifications…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('projectModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- PART MODAL -->
+<div class="overlay" id="partModal" onclick="closeModal('partModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Add New Part <button class="modal-close" onclick="closeModal('partModal')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Part Number *</label><input type="text" id="ptNum" placeholder="e.g. PT-001"></div>
+      <div class="form-group"><label>Part Name *</label><input type="text" id="ptName" placeholder="e.g. Front Panel"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Sub-Assembly</label><input type="text" id="ptSub" placeholder="e.g. Body Frame"></div>
+      <div class="form-group"><label>Material</label><input type="text" id="ptMat" placeholder="e.g. MS Sheet 2mm"></div>
+    </div>
+    <div class="form-group"><label>Description / Notes</label><textarea id="ptDesc" placeholder="Part description, function, revision notes…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('partModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePart()">Add Part</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT REQUIREMENT MODAL -->
+<div class="overlay" id="reqModal" onclick="closeModal('reqModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Add Client Requirement <button class="modal-close" onclick="closeModal('reqModal')">×</button></div>
+    <div class="form-group"><label>Requirement Title *</label><input type="text" id="rTitle" placeholder="e.g. Minimum 40 passenger seating capacity"></div>
+    <div class="form-group"><label>Department Responsible</label>
+      <select id="rDept">
+        <option value="all">All Departments</option>
+        <option value="mech">Mechanical</option>
+        <option value="elec">Electrical</option>
+        <option value="body">Body/Structure</option>
+        <option value="paint">Paint/Finishing</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Priority</label>
+      <div class="req-priority-btns">
+        <button id="rph" onclick="setPrio('High')">🔴 High</button>
+        <button id="rpm" onclick="setPrio('Medium')">🟡 Medium</button>
+        <button id="rpl" onclick="setPrio('Low')">🟢 Low</button>
+      </div>
+    </div>
+    <div class="form-group"><label>Details / Acceptance Criteria</label><textarea id="rNotes" placeholder="Client specification details, acceptance criteria, reference standard…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('reqModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReq()">Add Requirement</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="overlay" id="uploadModal" onclick="closeModal('uploadModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="uploadModalTitle">Upload Design File <button class="modal-close" onclick="closeModal('uploadModal')">×</button></div>
+    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInputHidden').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event)">
+      <div class="upload-icon">📁</div>
+      <p><b>Click to browse</b> or drag & drop</p>
+      <small>Any file type — images, PDFs, CAD, DXF, Excel…</small>
+    </div>
+    <input type="file" id="fileInputHidden" multiple onchange="handleFiles(this.files)">
+    <div id="uploadPreviewList"></div>
+    <div class="form-group" style="margin-top:12px"><label>Version / Revision Note</label><input type="text" id="uploadNote" placeholder="e.g. Rev 2 — updated weld points"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmUpload()">Save Files</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEPTS=[
+  {id:'mech',label:'Mechanical',color:'var(--mech)',bg:'dept-mech-bg',icon:'⚙️'},
+  {id:'elec',label:'Electrical',color:'var(--elec)',bg:'dept-elec-bg',icon:'⚡'},
+  {id:'body',label:'Body/Structure',color:'var(--body)',bg:'dept-body-bg',icon:'🚌'},
+  {id:'paint',label:'Paint/Finishing',color:'var(--paint)',bg:'dept-paint-bg',icon:'🎨'},
+];
+const WF=[
+  {id:'notstarted',label:'Not Started',cls:'wf-notstarted',dot:'#94a3b8'},
+  {id:'inprogress',label:'In Progress',cls:'wf-inprogress',dot:'#d97706'},
+  {id:'review',label:'In Review',cls:'wf-review',dot:'#2563eb'},
+  {id:'done',label:'Done',cls:'wf-done',dot:'#16a34a'},
+  {id:'blocked',label:'Blocked',cls:'wf-blocked',dot:'#dc2626'},
+];
+const WF_PCT={notstarted:0,inprogress:50,review:80,done:100,blocked:0};
+const WF_CLR={notstarted:'#94a3b8',inprogress:'#d97706',review:'#2563eb',done:'#16a34a',blocked:'#dc2626'};
+
+let db=JSON.parse(localStorage.getItem('busplm_v3')||'null')||{projects:[],parts:[],files:[],wf:{},reqs:[]};
+if(!db.wf)db.wf={};if(!db.reqs)db.reqs=[];
+
+let view='home',curProject=null,curPart=null;
+let pendingFiles=[],uploadTarget=null,reqPrio='High',reqProjId=null;
+
+function saveDB(){localStorage.setItem('busplm_v3',JSON.stringify(db));}
+
+/* ── WF HELPERS ── */
+function getWF(pid,did){return db.wf[pid+'_'+did]||'notstarted';}
+function setWFState(pid,did,s){db.wf[pid+'_'+did]=s;saveDB();}
+function partPct(pid){return Math.round(DEPTS.reduce((s,d)=>s+WF_PCT[getWF(pid,d.id)],0)/DEPTS.length);}
+function projPct(projId){const pts=db.parts.filter(p=>p.projectId===projId);if(!pts.length)return 0;return Math.round(pts.reduce((s,p)=>s+partPct(p.id),0)/pts.length);}
+function deptPct(projId,did){const pts=db.parts.filter(p=>p.projectId===projId);if(!pts.length)return 0;return Math.round(pts.reduce((s,p)=>s+WF_PCT[getWF(p.id,did)],0)/pts.length);}
+function phaseCount(projId){let todo=0,wip=0,done=0;db.parts.filter(p=>p.projectId===projId).forEach(p=>{DEPTS.forEach(d=>{const s=getWF(p.id,d.id);if(s==='done')done++;else if(s==='notstarted'||s==='blocked')todo++;else wip++;});});return{todo,wip,done};}
+function reqStats(projId){const r=db.reqs.filter(x=>x.projectId===projId);const d=r.filter(x=>x.done).length;return{done:d,total:r.length,pct:r.length?Math.round(d/r.length*100):0};}
+function pColor(p){return p>=80?'var(--green)':p>=40?'var(--yellow)':'var(--red)';}
+
+/* ── RENDER UTILS ── */
+function pBar(pct,color,h='8px'){color=color||pColor(pct);return `<div class="progress-bar-bg" style="height:${h}"><div class="progress-bar-fill" style="width:${pct}%;background:${color};height:100%"></div></div>`;}
+function circSVG(pct,color,sz=56){color=color||pColor(pct);const r=20,c=2*Math.PI*20,d=c*(pct/100);return `<svg width="${sz}" height="${sz}" viewBox="0 0 56 56"><circle cx="28" cy="28" r="20" fill="none" stroke="#e2e8f0" stroke-width="5"/><circle cx="28" cy="28" r="20" fill="none" stroke="${color}" stroke-width="5" stroke-dasharray="${d} ${c}" stroke-dashoffset="${c/4}" stroke-linecap="round" style="transition:stroke-dasharray .6s"/><text x="28" y="33" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="13" fill="${color}">${pct}%</text></svg>`;}
+
+/* ── ROUTER ── */
+function render(){if(view==='home')renderHome();else if(view==='project')renderProject();else if(view==='part')renderPart();updateBC();}
+
+/* ── HOME ── */
+function renderHome(){
+  document.getElementById('mainContent').innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">Manufacturing Projects</div><div class="page-sub">Bus body PLM — designs, workflow & client requirements</div></div>
+    <div class="toolbar"><button class="btn btn-primary" onclick="openModal('projectModal')">＋ New Project</button></div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" style="color:var(--mech)">${db.projects.length}</div><div class="stat-label">Projects</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--body)">${db.parts.length}</div><div class="stat-label">Total Parts</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--elec)">${db.files.length}</div><div class="stat-label">Design Files</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--paint)">${db.reqs.length}</div><div class="stat-label">Client Reqs</div></div>
+  </div>
+  ${!db.projects.length?`<div class="empty-state"><div class="ei">🚌</div><h3>No projects yet</h3><p>Click "+ New Project" to get started.</p></div>`
+  :`<div class="section-label">All Projects</div><div class="grid-3">${db.projects.map(projCardHTML).join('')}</div>`}`;
+}
+
+function projCardHTML(p){
+  const pct=projPct(p.id),ph=phaseCount(p.id),rp=reqStats(p.id),clr=pColor(pct);
+  return `<div class="project-card" onclick="openProject('${p.id}')">
+    <div class="project-card-top">
+      <div class="project-num">${p.code}</div>
+      <div class="project-name">${p.name}</div>
+      <div style="margin-top:10px">${pBar(pct,clr,'6px')}
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="font-size:.65rem;color:#ffffff80">${p.type||''}${p.client?' · '+p.client:''}</span>
+          <span style="font-family:var(--ff-head);font-size:.9rem;font-weight:800;color:${clr}">${pct}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="project-card-body">
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <span class="phase-pill" style="background:#f1f5f9;color:#64748b">⬜ ${ph.todo} Todo</span>
+        <span class="phase-pill" style="background:#fef3c7;color:#92400e">🔄 ${ph.wip} Active</span>
+        <span class="phase-pill" style="background:#dcfce7;color:#166534">✅ ${ph.done} Done</span>
+      </div>
+      ${rp.total?`<div style="font-size:.72rem;color:var(--ink2);margin-bottom:4px">Client Reqs: <b style="color:var(--ink)">${rp.done}/${rp.total}</b> complete</div>${pBar(rp.pct,'var(--blue)','4px')}`:'<div style="font-size:.72rem;color:var(--ink2)">No client requirements added</div>'}
+    </div>
+    <div class="card-footer"><span>${p.date||'No target date'}</span><span style="color:var(--mech)">Open →</span></div>
+  </div>`;
+}
+
+/* ── PROJECT VIEW ── */
+function openProject(id){curProject=db.projects.find(x=>x.id===id);view='project';render();}
+
+function renderProject(){
+  const p=curProject,parts=db.parts.filter(x=>x.projectId===p.id),pct=projPct(p.id),ph=phaseCount(p.id),rp=reqStats(p.id),reqs=db.reqs.filter(r=>r.projectId===p.id);
+  document.getElementById('mainContent').innerHTML=`
+  <button class="back-link" onclick="goHome()">← Back to Projects</button>
+  <div class="page-header">
+    <div><div class="page-title">${p.name}</div><div class="page-sub">${p.code}${p.client?' · Client: '+p.client:''}${p.type?' · '+p.type:''}${p.date?' · Target: '+p.date:''}</div></div>
+    <div class="toolbar">
+      <button class="btn btn-outline btn-sm" onclick="deleteProject('${p.id}')">Delete</button>
+      <button class="btn btn-outline btn-sm" onclick="openReqModal('${p.id}')">＋ Client Req</button>
+      <button class="btn btn-primary" onclick="openAddPart()">＋ Add Part</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAND -->
+  <div class="prog-band">
+    <div><div class="prog-band-title">Overall Progress</div><div style="font-size:.7rem;opacity:.6;margin-top:2px">${parts.length} parts · ${DEPTS.length} depts</div></div>
+    <div class="prog-band-bar">
+      ${pBar(pct,pColor(pct),'10px')}
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <span class="phase-pill" style="background:#ffffff20;color:#fff">⬜ ${ph.todo} Not Started</span>
+        <span class="phase-pill" style="background:#fcd34d40;color:#fcd34d">🔄 ${ph.wip} In Progress</span>
+        <span class="phase-pill" style="background:#86efac40;color:#86efac">✅ ${ph.done} Done</span>
+      </div>
+    </div>
+    <div style="text-align:center">${circSVG(pct,pColor(pct),60)}<div style="font-size:.65rem;opacity:.6;margin-top:4px">Complete</div></div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:1.5rem">
+    <!-- CLIENT REQUIREMENTS -->
+    <div class="req-section">
+      <div class="req-section-title">📋 Client Requirements
+        <span style="font-size:.72rem;font-weight:400;color:var(--ink2);margin-left:auto">${rp.done}/${rp.total} done</span>
+        <button class="btn btn-outline btn-sm" onclick="openReqModal('${p.id}')">＋ Add</button>
+      </div>
+      ${rp.total?pBar(rp.pct,'var(--blue)','6px')+'<div style="margin-bottom:8px"></div>':''}
+      ${!reqs.length?`<div style="text-align:center;padding:1rem;color:var(--ink2);font-size:.78rem">No client requirements yet.<br>Click "+ Add" to define what the client needs.</div>`
+      :`<div>${reqs.map(reqHTML).join('')}</div>`}
+    </div>
+    <!-- DEPT PROGRESS -->
+    <div class="req-section">
+      <div class="req-section-title">📊 Department Progress</div>
+      ${DEPTS.map(d=>{
+        const dp=deptPct(p.id,d.id),df=db.files.filter(f=>f.projectId===p.id&&f.deptId===d.id).length;
+        return `<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="showDeptView('${d.id}')">
+              <div style="width:10px;height:10px;border-radius:50%;background:${d.color}"></div>
+              <span style="font-size:.78rem;font-weight:500">${d.icon} ${d.label}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:.68rem;color:var(--ink2)">${df} file${df!==1?'s':''}</span>
+              <span style="font-family:var(--ff-head);font-weight:800;font-size:.9rem;color:${pColor(dp)}">${dp}%</span>
+            </div>
+          </div>
+          ${pBar(dp,pColor(dp),'6px')}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="section-label">Parts & Workflow Status</div>
+  ${!parts.length?`<div class="empty-state"><div class="ei">🔩</div><h3>No parts yet</h3><p>Add parts to start tracking workflow.</p></div>`
+  :`<div class="grid-3">${parts.map(partCardHTML).join('')}</div>`}`;
+}
+
+function reqHTML(r){
+  const dept=r.deptId==='all'?'All Depts':(DEPTS.find(d=>d.id===r.deptId)||{label:r.deptId}).label;
+  return `<div class="req-item">
+    <div class="req-check ${r.done?'checked':''}" onclick="toggleReq('${r.id}')">${r.done?'✓':''}</div>
+    <div class="req-text">
+      <div class="req-title-text" style="${r.done?'text-decoration:line-through;opacity:.5':''}">${r.title}
+        <span class="req-priority ${r.priority==='High'?'prio-high':r.priority==='Medium'?'prio-med':'prio-low'}">${r.priority}</span>
+      </div>
+      <div class="req-meta">${dept}${r.notes?' · '+r.notes:''}</div>
+    </div>
+    <button onclick="deleteReq('${r.id}')" style="background:none;border:none;cursor:pointer;color:var(--ink2);font-size:.9rem;flex-shrink:0">✕</button>
+  </div>`;
+}
+
+function partCardHTML(pt){
+  const pct=partPct(pt.id),files=db.files.filter(f=>f.partId===pt.id).length;
+  return `<div class="part-card" onclick="openPart('${pt.id}')">
+    <div class="part-card-header">
+      <div><div class="part-id">${pt.num}</div><div class="part-name-big">${pt.name}</div>${pt.sub?`<div style="font-size:.7rem;color:var(--ink2);margin-top:2px">${pt.sub}</div>`:''}</div>
+      ${circSVG(pct,pColor(pct),48)}
+    </div>
+    <div class="part-body">
+      <div style="margin-bottom:8px">${pBar(pct,pColor(pct))}</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${DEPTS.map(d=>{const st=getWF(pt.id,d.id),wf=WF.find(w=>w.id===st),dp=WF_PCT[st];
+          return `<div class="dept-wf-row">
+            <div class="dept-dot-sm" style="background:${d.color}"></div>
+            <div style="flex:1;font-size:.72rem">${d.label}</div>
+            <div style="flex:2">${pBar(dp,WF_CLR[st],'5px')}</div>
+            <span class="wf-pill ${wf.cls}" style="margin-left:6px">${wf.label}</span>
+          </div>`;}).join('')}
+      </div>
+      <div style="margin-top:10px;font-size:.68rem;color:var(--ink2);border-top:1px solid var(--bg2);padding-top:6px">${files} design file${files!==1?'s':''}</div>
+    </div>
+  </div>`;
+}
+
+/* ── PART VIEW ── */
+function openPart(id){curPart=db.parts.find(x=>x.id===id);view='part';render();}
+
+function renderPart(){
+  const pt=curPart,pct=partPct(pt.id);
+  document.getElementById('mainContent').innerHTML=`
+  <button class="back-link" onclick="openProject('${curProject.id}')">← Back to ${curProject.name}</button>
+  <div class="page-header">
+    <div><div class="page-title">${pt.name}</div><div class="page-sub">${pt.num}${pt.sub?' · '+pt.sub:''}${pt.mat?' · Material: '+pt.mat:''}</div></div>
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:8px">${circSVG(pct,pColor(pct),48)}
+        <div><div style="font-family:var(--ff-head);font-size:1.2rem;font-weight:800;color:${pColor(pct)}">${pct}% Complete</div><div style="font-size:.68rem;color:var(--ink2)">across all departments</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="deletePart('${pt.id}')">Delete Part</button>
+    </div>
+  </div>
+  ${pt.desc?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:1.2rem;font-size:.8rem;color:var(--ink2)">${pt.desc}</div>`:''}
+  <div style="margin-bottom:1.5rem">${pBar(pct,pColor(pct),'10px')}</div>
+  <div>${DEPTS.map(d=>deptSectionHTML(pt.id,d)).join('')}</div>`;
+}
+
+function deptSectionHTML(partId,dept){
+  const st=getWF(partId,dept.id),wf=WF.find(w=>w.id===st),files=db.files.filter(f=>f.partId===partId&&f.deptId===dept.id),pct=WF_PCT[st];
+  return `<div class="dept-section-wrap">
+    <div class="dept-section-head">
+      <div class="dept-stripe" style="background:${dept.color}"></div>
+      <div class="dept-section-info">
+        <div class="dept-title">${dept.icon} ${dept.label}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span class="wf-pill ${wf.cls}">${wf.label}</span>
+          <span style="font-size:.68rem;color:var(--ink2)">${pct}% · ${files.length} file${files.length!==1?'s':''}</span>
+        </div>
+      </div>
+      <button class="btn dept-btn ${dept.bg} btn-sm" onclick="openUpload('${partId}','${dept.id}','${dept.label}')">＋ Upload</button>
+    </div>
+    <div class="dept-section-body">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.68rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Update Workflow Status</div>
+        <div class="wf-selector">
+          ${WF.map(w=>`<div class="wf-opt ${w.cls}${st===w.id?' active-opt':''}" onclick="updateWF('${partId}','${dept.id}','${w.id}')">${w.label}</div>`).join('')}
+        </div>
+        ${pBar(pct,WF_CLR[st],'6px')}
+      </div>
+      ${!files.length
+        ?`<div style="border:1px dashed var(--border);border-radius:var(--radius);padding:1.2rem;text-align:center;color:var(--ink2);font-size:.78rem">No files yet. Click "+ Upload" to add designs from ${dept.label} team.</div>`
+        :`<div class="file-list">${files.map(fileHTML).join('')}</div>`}
+    </div>
+  </div>`;
+}
+
+function updateWF(partId,deptId,state){
+  setWFState(partId,deptId,state);
+  if(view==='part')renderPart();else if(view==='project')renderProject();
+  toast('Status → '+WF.find(w=>w.id===state).label);
+}
+
+/* ── DEPT OVERVIEW ── */
+function showDeptView(deptId){
+  const dept=DEPTS.find(d=>d.id===deptId),p=curProject,parts=db.parts.filter(x=>x.projectId===p.id),dp=deptPct(p.id,deptId);
+  document.getElementById('mainContent').innerHTML=`
+  <button class="back-link" onclick="openProject('${p.id}')">← Back to ${p.name}</button>
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:8px;height:48px;background:${dept.color};border-radius:4px"></div>
+      <div><div class="page-title">${dept.icon} ${dept.label}</div><div class="page-sub">${p.name} — all parts</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      ${circSVG(dp,pColor(dp),56)}
+      <div><div style="font-family:var(--ff-head);font-size:1.4rem;font-weight:800;color:${pColor(dp)}">${dp}%</div><div style="font-size:.68rem;color:var(--ink2)">Dept Complete</div></div>
+    </div>
+  </div>
+  <div style="margin-bottom:1.5rem">${pBar(dp,pColor(dp),'10px')}</div>
+  ${parts.map(pt=>{
+    const st=getWF(pt.id,deptId),wf=WF.find(w=>w.id===st),files=db.files.filter(f=>f.partId===pt.id&&f.deptId===deptId),pp=WF_PCT[st];
+    return `<div style="margin-bottom:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+      <div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="openPart('${pt.id}')">
+        <div><span style="font-size:.68rem;color:var(--ink2)">${pt.num} · </span><b style="font-family:var(--ff-head);font-size:1rem;text-transform:uppercase">${pt.name}</b></div>
+        <div style="display:flex;align-items:center;gap:10px"><span class="wf-pill ${wf.cls}">${wf.label}</span><span style="font-family:var(--ff-head);font-weight:800;color:${pColor(pp)}">${pp}%</span></div>
+      </div>
+      <div style="padding:1rem">
+        <div style="margin-bottom:8px">${pBar(pp,WF_CLR[st],'5px')}</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:.68rem;color:var(--ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">Update Status</div>
+          <div class="wf-selector">${WF.map(w=>`<div class="wf-opt ${w.cls}${st===w.id?' active-opt':''}" onclick="updateWF('${pt.id}','${deptId}','${w.id}');showDeptView('${deptId}')">${w.label}</div>`).join('')}</div>
+        </div>
+        ${!files.length
+          ?`<div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:.75rem;color:var(--ink2)">No files yet</span><button class="btn dept-btn ${dept.bg} btn-sm" onclick="openUpload('${pt.id}','${deptId}','${dept.label}')">＋ Upload</button></div>`
+          :`<div class="file-list" style="margin-bottom:8px">${files.map(fileHTML).join('')}</div><button class="btn dept-btn ${dept.bg} btn-sm" onclick="openUpload('${pt.id}','${deptId}','${dept.label}')">＋ Upload More</button>`}
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+function fileHTML(f){
+  const isImg=/\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(f.name),isPdf=/\.pdf$/i.test(f.name);
+  const icon=isImg?'🖼️':isPdf?'📄':f.name.match(/\.dxf$|\.dwg$/i)?'📐':f.name.match(/\.xlsx?$/i)?'📊':'📎';
+  return `<div class="file-item">
+    ${isImg&&f.data?`<img class="file-preview-thumb" src="${f.data}" alt="" onclick="openLB('${f.id}')" style="cursor:pointer">`:`<div class="file-icon">${icon}</div>`}
+    <div class="file-info"><div class="file-name">${f.name}</div><div class="file-meta">${f.note?f.note+' · ':''}${f.size} · ${f.date}</div></div>
+    <div class="file-actions">
+      ${f.data&&isImg?`<button class="btn btn-outline btn-sm" onclick="openLB('${f.id}')">👁</button>`:''}
+      ${f.data?`<button class="btn btn-outline btn-sm" onclick="dlFile('${f.id}')">↓</button>`:''}
+      <button class="btn btn-outline btn-sm" onclick="delFile('${f.id}')" style="color:#c0392b;border-color:#c0392b">✕</button>
+    </div>
+  </div>`;
+}
+
+/* ── CRUD ── */
+function saveProject(){
+  const name=document.getElementById('pName').value.trim(),code=document.getElementById('pCode').value.trim();
+  if(!name||!code){toast('Name and Code required!');return;}
+  db.projects.push({id:Date.now().toString(),name,code,client:document.getElementById('pClient').value.trim(),type:document.getElementById('pType').value,date:document.getElementById('pDate').value.trim(),budget:document.getElementById('pBudget').value.trim(),desc:document.getElementById('pDesc').value.trim(),created:new Date().toLocaleDateString()});
+  saveDB();closeModal('projectModal');render();toast('Project created ✓');
+}
+function deleteProject(id){
+  if(!confirm('Delete this project and all data?'))return;
+  db.projects=db.projects.filter(x=>x.id!==id);
+  const pts=db.parts.filter(x=>x.projectId===id).map(x=>x.id);
+  db.parts=db.parts.filter(x=>x.projectId!==id);
+  db.files=db.files.filter(x=>x.projectId!==id);
+  db.reqs=db.reqs.filter(x=>x.projectId!==id);
+  pts.forEach(p=>DEPTS.forEach(d=>delete db.wf[p+'_'+d.id]));
+  saveDB();goHome();toast('Project deleted');
+}
+function openAddPart(){['ptNum','ptName','ptSub','ptMat','ptDesc'].forEach(i=>document.getElementById(i).value='');openModal('partModal');}
+function savePart(){
+  const num=document.getElementById('ptNum').value.trim(),name=document.getElementById('ptName').value.trim();
+  if(!num||!name){toast('Part Number and Name required!');return;}
+  db.parts.push({id:Date.now().toString(),projectId:curProject.id,num,name,sub:document.getElementById('ptSub').value.trim(),mat:document.getElementById('ptMat').value.trim(),desc:document.getElementById('ptDesc').value.trim(),created:new Date().toLocaleDateString()});
+  saveDB();closeModal('partModal');renderProject();toast('Part added ✓');
+}
+function deletePart(id){
+  if(!confirm('Delete this part?'))return;
+  DEPTS.forEach(d=>delete db.wf[id+'_'+d.id]);
+  db.parts=db.parts.filter(x=>x.id!==id);
+  db.files=db.files.filter(x=>x.partId!==id);
+  saveDB();openProject(curProject.id);toast('Part deleted');
+}
+function openReqModal(pid){
+  reqProjId=pid;reqPrio='High';
+  ['rTitle','rNotes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('rDept').value='all';setPrio('High');openModal('reqModal');
+}
+function setPrio(p){
+  reqPrio=p;
+  document.getElementById('rph').className=p==='High'?'sel-high':'';
+  document.getElementById('rpm').className=p==='Medium'?'sel-med':'';
+  document.getElementById('rpl').className=p==='Low'?'sel-low':'';
+}
+function saveReq(){
+  const title=document.getElementById('rTitle').value.trim();
+  if(!title){toast('Title required!');return;}
+  db.reqs.push({id:Date.now().toString(),projectId:reqProjId,title,deptId:document.getElementById('rDept').value,priority:reqPrio,notes:document.getElementById('rNotes').value.trim(),done:false,created:new Date().toLocaleDateString()});
+  saveDB();closeModal('reqModal');if(view==='project')renderProject();toast('Requirement added ✓');
+}
+function toggleReq(id){const r=db.reqs.find(x=>x.id===id);if(r){r.done=!r.done;saveDB();if(view==='project')renderProject();}}
+function deleteReq(id){db.reqs=db.reqs.filter(x=>x.id!==id);saveDB();if(view==='project')renderProject();toast('Req removed');}
+
+/* ── FILE UPLOAD ── */
+function openUpload(partId,deptId,deptLabel){
+  uploadTarget={partId,deptId};pendingFiles=[];
+  document.getElementById('uploadPreviewList').innerHTML='';
+  document.getElementById('uploadNote').value='';
+  document.getElementById('fileInputHidden').value='';
+  document.getElementById('uploadModalTitle').childNodes[0].textContent=`Upload — ${deptLabel} `;
+  openModal('uploadModal');
+}
+function dragOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('drag');}
+function dragLeave(){document.getElementById('dropZone').classList.remove('drag');}
+function handleDrop(e){e.preventDefault();dragLeave();handleFiles(e.dataTransfer.files);}
+function handleFiles(fl){
+  const c=document.getElementById('uploadPreviewList');
+  Array.from(fl).forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const entry={file,data:e.target.result,name:file.name};pendingFiles.push(entry);
+      const isImg=file.type.startsWith('image/'),div=document.createElement('div');
+      div.className='file-item';div.style.marginTop='6px';
+      div.innerHTML=`${isImg?`<img class="file-preview-thumb" src="${e.target.result}" alt="">`:`<div class="file-icon">📎</div>`}<div class="file-info"><div class="file-name">${file.name}</div><div class="file-meta">${fmtSz(file.size)}</div></div>`;
+      c.appendChild(div);
+    };r.readAsDataURL(file);
+  });
+}
+function confirmUpload(){
+  if(!pendingFiles.length){toast('No files!');return;}
+  const note=document.getElementById('uploadNote').value.trim(),part=db.parts.find(p=>p.id===uploadTarget.partId);
+  pendingFiles.forEach(e=>{db.files.push({id:Date.now().toString()+Math.random().toString(36).slice(2),projectId:part.projectId,partId:uploadTarget.partId,deptId:uploadTarget.deptId,name:e.name,data:e.data,size:fmtSz(e.file.size),note,date:new Date().toLocaleDateString()});});
+  saveDB();closeModal('uploadModal');
+  if(view==='part')renderPart();else if(view==='project')renderProject();
+  toast(`${pendingFiles.length} file(s) uploaded ✓`);pendingFiles=[];
+}
+function delFile(id){db.files=db.files.filter(f=>f.id!==id);saveDB();if(view==='part')renderPart();else render();toast('File removed');}
+function dlFile(id){const f=db.files.find(x=>x.id===id);if(!f||!f.data)return;const a=document.createElement('a');a.href=f.data;a.download=f.name;a.click();}
+function openLB(id){const f=db.files.find(x=>x.id===id);if(!f||!f.data)return;document.getElementById('lightboxImg').src=f.data;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+/* ── EXPORT ── */
+function exportCSV(){
+  const rows=[['Project','Code','Part No','Part Name','Department','Status','Progress%','Files','Client Reqs Done','Client Reqs Total']];
+  db.projects.forEach(p=>{
+    const rp=reqStats(p.id);
+    db.parts.filter(x=>x.projectId===p.id).forEach(pt=>{
+      DEPTS.forEach(d=>{
+        const st=getWF(pt.id,d.id),files=db.files.filter(f=>f.partId===pt.id&&f.deptId===d.id).length;
+        rows.push([p.name,p.code,pt.num,pt.name,d.label,WF.find(w=>w.id===st).label,WF_PCT[st],files,rp.done,rp.total].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
+      });
+    });
+  });
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='busplm_export.csv';a.click();toast('CSV exported ✓');
+}
+
+/* ── NAV & UTILS ── */
+function goHome(){view='home';curProject=null;curPart=null;render();}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
+function updateBC(){
+  const bc=document.getElementById('breadcrumb');
+  let h=`<span onclick="goHome()">Home</span>`;
+  if(curProject)h+=`<span class="sep"> / </span><span onclick="openProject('${curProject.id}')">${curProject.name}</span>`;
+  if(view==='part'&&curPart)h+=`<span class="sep"> / </span><span class="current">${curPart.name}</span>`;
+  bc.innerHTML=h;
+}
+function fmtSz(b){if(b<1024)return b+'B';if(b<1048576)return (b/1024).toFixed(1)+'KB';return (b/1048576).toFixed(1)+'MB';}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+/* ── DEMO DATA ── */
+if(!db.projects.length){
+  const pid='1001';
+  db.projects.push({id:pid,name:'City Bus CB-400',code:'CB-400',client:'GSRTC',type:'City Bus',date:'Jun 2025',budget:'45,00,000',desc:'40-seat city bus, diesel + CNG, for urban routes.',created:'01/03/2025'});
+  db.parts.push(
+    {id:'p1',projectId:pid,num:'PT-001',name:'Front Panel',sub:'Body Frame',mat:'MS Sheet 2mm',desc:'Main front body panel including windshield mount.',created:'05/03/2025'},
+    {id:'p2',projectId:pid,num:'PT-002',name:'Rear Chassis Bracket',sub:'Chassis',mat:'MS Channel 100×50',desc:'Rear load-bearing chassis cross member.',created:'06/03/2025'},
+    {id:'p3',projectId:pid,num:'PT-003',name:'Electrical Panel Box',sub:'Electrical',mat:'Galvanized MS',desc:'Main electrical distribution panel housing.',created:'07/03/2025'},
+  );
+  // workflow states
+  db.wf['p1_body']='done';db.wf['p1_mech']='inprogress';db.wf['p1_paint']='notstarted';db.wf['p1_elec']='review';
+  db.wf['p2_mech']='done';db.wf['p2_body']='inprogress';db.wf['p2_elec']='notstarted';db.wf['p2_paint']='notstarted';
+  db.wf['p3_elec']='inprogress';db.wf['p3_mech']='done';db.wf['p3_body']='done';db.wf['p3_paint']='notstarted';
+  // client requirements
+  db.reqs.push(
+    {id:'r1',projectId:pid,title:'Minimum 40 passenger seating capacity',deptId:'body',priority:'High',notes:'Per GSRTC spec sheet v3',done:true,created:'01/03/2025'},
+    {id:'r2',projectId:pid,title:'Full LED interior & exterior lighting',deptId:'elec',priority:'High',notes:'12V DC system, energy efficient',done:false,created:'01/03/2025'},
+    {id:'r3',projectId:pid,title:'Anti-rust epoxy primer on all body panels',deptId:'paint',priority:'Medium',notes:'Minimum 2 coats required',done:false,created:'02/03/2025'},
+    {id:'r4',projectId:pid,title:'CNG cylinder bracket per AIS-007 standard',deptId:'mech',priority:'High',notes:'Safety compliance mandatory',done:true,created:'02/03/2025'},
+  );
+  saveDB();
+}
+render();
+</script>
+</body>
+</html>
